@@ -66,8 +66,8 @@ TMPDIR=/opt/jetty-9.3/temp
 ```
 ...
         <Location /identity>
-                ProxyPass http://c5.gluu.org:8082/identity retry=5
-                ProxyPassReverse http://c5.gluu.org:8082/identity
+                ProxyPass http://c5.gluu.org:8082/identity retry=5 	   <------ oxauth FQDN here
+                ProxyPassReverse http://c5.gluu.org:8082/identity	   <------ oxauth FQDN here
                 Order allow,deny
                 Allow from all
         </Location>
@@ -96,5 +96,16 @@ hostname = "c4.gluu.org" <------ Change this to your oxAuth server
 ...
 ```
 
-9) Restart identity on the identity server and restart oxauth on the oxauth server to reload settings.
+11) Restart identity on the identity server and restart oxauth on the oxauth server to reload settings.
 
+c4.gluu.org
+```
+service oxauth restart
+```
+
+c5.gluu.org
+```
+service identity restart
+```
+
+Now you should be able to log in to Gluu through your oxAuth FQDN (c4.gluu.org in my case)
