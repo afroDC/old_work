@@ -1,5 +1,4 @@
 3 servers
-Using 3.1.0 in this example. For 3.0.2, I don't think running keystore_Config.py is necessary, as it doesn't use Weld.
 
 ```
 c4.gluu.org (1st Gluu-oxAuth/Apache2)
@@ -62,15 +61,28 @@ TMPDIR=/opt/jetty-9.3/temp
 
 - This is where you'll need to work on your network layer for protecting port 8082 communication between the oxAuth and Identity server i.e. firewall etc.
 
-7) Open LDAP to external communication by modifying `/opt/symas/etc/openldap/symas-openldap.conf`, changing `HOST_LIST="ldaps://127.0.0.1:1636/"` to `HOST_LIST="ldaps://0.0.0.0:1636/"`
+7) edit `/etc/httpd/conf.d/https_gluu.conf` on the oxAuth server (c4.gluu.org) to point to the identity server (c5.gluu.org):
+
+```
+...
+        <Location /identity>
+                ProxyPass http://c5.gluu.org:8082/identity retry=5
+                ProxyPassReverse http://c5.gluu.org:8082/identity
+                Order allow,deny
+                Allow from all
+        </Location>
+...
+```
+
+8) Open LDAP to external communication by modifying `/opt/symas/etc/openldap/symas-openldap.conf`, changing `HOST_LIST="ldaps://127.0.0.1:1636/"` to `HOST_LIST="ldaps://0.0.0.0:1636/"`
 
 - `service solserver restart` for the changes to take effect.
 
 - LDAP communication on 1636 is SSL, so no firewall configurations are necessary here
 
-8) In JXPlorer I connect to c6.gluu.org (My LDAP server) and change my o=gluu -> appliances -> inum= xxxx.xxxx.xxxx.xxxx!0002 -> oxIDPAuthentication entry from servers\": [\"localhost:1636\"] to servers\": [\"c6.gluu.org:1636\"]
+9) In JXPlorer I connect to c6.gluu.org (My LDAP server) and change my o=gluu -> appliances -> inum= xxxx.xxxx.xxxx.xxxx!0002 -> oxIDPAuthentication entry from servers\": [\"localhost:1636\"] to servers\": [\"c6.gluu.org:1636\"]
 
-8) Copy all certs from oxAuth server to Identity server and run `keystore_Config.py` script
+10) Copy all certs from oxAuth server to Identity server and run `keystore_Config.py` script
 
 - Make sure to modify the `hostname` in `keystore_Config` to the hostname of your oxAuth server, we used earlier when installing Gluu on the first machine.
 
@@ -85,3 +97,4 @@ hostname = "c4.gluu.org" <------ Change this to your oxAuth server
 ```
 
 9) Restart identity on the identity server and restart oxauth on the oxauth server to reload settings.
+
