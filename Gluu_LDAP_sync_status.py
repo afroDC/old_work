@@ -1,3 +1,4 @@
+from __future__ import with_statement
 import sys
 import string
 import time
@@ -108,6 +109,7 @@ def addUser():
 def checkDiff():
     compare = []
     for host in hosts:
+        ldapEntries = []
         try:
             ldap_uri = "ldap://{}".format(host)
             print 'Connecting to ', host
@@ -119,8 +121,11 @@ def checkDiff():
             conn.search(search_base = 'o=gluu', search_filter = '(objectClass=*)',search_scope = SUBTREE, attributes=['*','+'])
             # Add the contextCSN to the compare list
             compare.append(conn.response)
+            ldapEntries = conn.response
         except:
             print host, "seems down"
+        with open("{}_entries.log".format(host),"a") as ldapEntry:
+                ldapEntry.write('{} \n'.format(ldapEntries))
     # Compare entries to see if data matches.
     try:
         if all(x==compare[0] for x in compare):
