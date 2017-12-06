@@ -6,12 +6,10 @@ import random
 from ldap3 import Server, Connection, MODIFY_REPLACE, MODIFY_ADD, MODIFY_DELETE, SUBTREE, ALL, BASE, LEVEL
 
 # Replace with FQDN's of your LDAP servers separated by commas
-hosts = ('c5.gluu.org',
-         'c6.gluu.org',
-         'c7.gluu.org'
+hosts = (
         )
 # Input LDAP DN and Password in the following variables
-password = 'secret'
+password = ''
 DN       = 'cn=directory manager,o=gluu'
 def getName():
     name = ''
