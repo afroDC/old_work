@@ -219,11 +219,11 @@ public class TestScimClient {
         //scim.simpleSearch();
         //scim.simpleSearchAll();
 	
-        //scim.delUser();4
-		// Snippet of code to iterate through all 200 entries returned from 'retrieveAllUsers()'
+        //scim.delUser();
+  	// Snippet of code to iterate through all 200 entries returned from 'retrieveAllUsers()'
         /*
         int n = 0;
-        for (int i = 5; n<=i;n++) {
+        for (int i = 10; n<=i;n++) {
             scim.delAll();
             System.out.println("\n\n\n\nIteration: " + n + "\n\n\n\n");
         }
