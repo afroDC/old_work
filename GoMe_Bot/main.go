@@ -8,6 +8,7 @@ import (
 	"os"
 	//"strings"
 	//"io/ioutil"
+	//"strconv"
 	"time"
 )
 
@@ -94,6 +95,7 @@ func getGroupMembers(url string) {
 
 // Used to gather all messages from GroupMe
 // Still need to build a function to save all these messages to file.
+
 func saveAllMessages(url string) {
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -113,7 +115,6 @@ func saveAllMessages(url string) {
 	err = decoder.Decode(&data)
 
 	jsonMess, err := json.Marshal(data)
-	//err = ioutil.WriteFile("allMessages.json", jsonMess, 0644)
 	f, err := os.OpenFile("allMessages.json", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		fmt.Printf("%T\n%s\n%#v\n", err, err, err)
@@ -123,17 +124,28 @@ func saveAllMessages(url string) {
 	if _, err = f.Write(jsonMess); err != nil {
 		panic(err)
 	}
+
 	// Iterate through the 100 message limit by utilizing before_id of the last message id in the request.
-	for i, mes := range data.Response.Messages {
 
-		//fmt.Printf("%d: %s %s %s\n", i, mes.Name, mes.Text, mes.ID)
-		if ln := len(data.Response.Messages); i == ln-1 {
-			//fmt.Println("Last message id: ", mes.ID)
-			saveAllMessages("https://api.groupme.com/v3/groups/9672911/messages?token=03Y3Q6VCHem5jGABvaPnZHEBN7ipxPHdTiEKbxL2&limit=100" + "&before_id=" + mes.ID)
-		}
+	if ln := len(data.Response.Messages); ln == 100 {
+		EOF := data.Response.Messages[99]
+		fmt.Println("Last message id: ", EOF.ID)
+		//count += 1
+		saveAllMessages("https://api.groupme.com/v3/groups/9672911/messages?token=03Y3Q6VCHem5jGABvaPnZHEBN7ipxPHdTiEKbxL2&limit=100" + "&before_id=" + EOF.ID)
+	} /*
+		for i, mes := range data.Response.Messages {
+			fmt.Printf("%d: %s: %s %s\n", i, mes.Name, mes.Text, time.Unix(convertEpoch(mes.CreatedAt), 0))
+			if ln := len(data.Response.Messages); i == ln-1 {
+				//fmt.Println("Last message id: ", mes.ID)
+				saveAllMessages("https://api.groupme.com/v3/groups/9672911/messages?token=03Y3Q6VCHem5jGABvaPnZHEBN7ipxPHdTiEKbxL2&limit=100" + "&before_id=" + mes.ID)
+			}
+		}*/
+}
 
-	}
-
+func convertEpoch(num int) int64 {
+	var conv int64
+	conv = int64(num)
+	return conv
 }
 
 func getJson(url string, target interface{}) error {
@@ -161,6 +173,5 @@ func main() {
 	//getGroupMembers(groupUrl)
 
 	saveAllMessages(messageUrl)
-
 
 }
