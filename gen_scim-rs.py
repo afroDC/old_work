@@ -47,8 +47,8 @@ def findFiles(filePatterns, filesFolder):
             for fileFullPath in glob.iglob(fileFullPathPattern):
                 foundFiles.append(fileFullPath)
     except:
-        self.logIt("Error finding files %s in folder %s" % (":".join(filePatterns), filesFolder), True)
-        self.logIt(traceback.format_exc(), True)
+        print ("Error finding files %s in folder %s" % (":".join(filePatterns), filesFolder), True)
+        print (traceback.format_exc(), True)
 
     return foundFiles
 
