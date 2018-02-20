@@ -28,17 +28,19 @@ class Setup(object):
         self.cmd_rpm = '/bin/rpm'
         self.cmd_dpkg = '/usr/bin/dpkg'
         self.opensslCommand = '/usr/bin/openssl'
-
+        self.gluuBaseFolder = '/etc/gluu'
         self.outputFolder = '%s/output' % self.install_dir
-
+        self.jython_home = '/opt/jython'
         self.jre_home = '/opt/jre'
         self.cmd_java = '%s/bin/java' % self.jre_home
         self.cmd_keytool = '%s/bin/keytool' % self.jre_home
         self.cmd_jar = '%s/bin/jar' % self.jre_home
-
+        self.jetty_dist = '/opt/jetty-9.3'
+        # Can change this value below
+        self.application_max_ram = 3072
         self.gluuOptFolder = '/opt/gluu'
         self.jetty_home = '/opt/jetty'
-
+        self.templateRenderingDict = {}
         self.jetty_base = '%s/jetty' % self.gluuOptFolder
 
         self.jetty_app_configuration = {
@@ -168,6 +170,19 @@ class Setup(object):
 
         serviceConfiguration['installed'] = True
 
+    def fomatWithDict(self, text, dictionary):
+        text = re.sub(r"%([^\(])", r"%%\1", text)
+        text = re.sub(r"%$", r"%%", text)  # There was a % at the end?
+
+        return text % dictionary
+ 
+    def merge_dicts(self, *dict_args):
+        result = {}
+        for dictionary in dict_args:
+            result.update(dictionary)
+
+        return result
+
     def renderTemplateInOut(self, filePath, templateFolder, outputFolder):
         self.logIt("Rendering template %s" % filePath)
         fn = os.path.split(filePath)[-1]
@@ -183,9 +198,6 @@ class Setup(object):
         newFn.write(self.fomatWithDict(template_text, self.merge_dicts(self.__dict__, self.templateRenderingDict)))
         newFn.close()
 
-    def install_gluu_components(self):
-        self.install_oxtrust()
-        
     def run(self, args, cwd=None, env=None, useWait=False, shell=False):
         self.logIt('Running: %s' % ' '.join(args))
         try:
@@ -261,157 +273,6 @@ class Setup(object):
     def detect_initd(self):
         return open(os.path.join('/proc/1/status'), 'r').read().split()[1]
 
-    def install_gluu_components(self):
-        if self.installLdap:
-            progress_bar(25, "Installing Gluu components: LDAP")
-            self.install_ldap_server()
-
-        if self.installHttpd:
-            progress_bar(25, "Installing Gluu components: HTTPD")
-            self.configure_httpd()
-
-        if self.installOxAuth:
-            progress_bar(25, "Installing Gluu components: OxAuth")
-            self.install_oxauth()
-
-        if self.installOxTrust:
-            progress_bar(25, "Installing Gluu components: oxtruest")
-            self.install_oxtrust()
-
-        if self.installSaml:
-            progress_bar(25, "Installing Gluu components: saml")
-            self.install_saml()
-
-        if self.installAsimba:
-            progress_bar(25, "Installing Gluu components: Asimba")
-            self.install_asimba()
-
-        if self.installOxAuthRP:
-            progress_bar(25, "Installing Gluu components: OxAuthRP")
-            self.install_oxauth_rp()
-
-        if self.installPassport:
-            progress_bar(25, "Installing Gluu components: Passport")
-            self.install_passport()
-
-    def promptForProperties(self):
-
-        promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the MIT license?","N|y")[0].lower()
-        if promptForMITLicense != 'y':
-            sys.exit(0)
-        
-        # IP address needed only for Apache2 and hosts file update
-        if self.installHttpd:
-            self.ip = self.get_ip()
-
-        detectedHostname = None
-        try:
-            detectedHostname = socket.gethostbyaddr(socket.gethostname())[0]
-        except:
-            try:
-                detectedHostname = os.popen("/bin/hostname").read().strip()
-            except:
-                self.logIt("No detected hostname", True)
-                self.logIt(traceback.format_exc(), True)
-        if detectedHostname:
-            self.hostname = self.getPrompt("Enter hostname", detectedHostname)
-        else:
-            self.hostname = self.getPrompt("Enter hostname")
-
-        # Get city and state|province code
-        self.city = self.getPrompt("Enter your city or locality")
-        self.state = self.getPrompt("Enter your state or province two letter code")
-
-        # Get the Country Code
-        long_enough = False
-        while not long_enough:
-            countryCode = self.getPrompt("Enter two letter Country Code")
-            if len(countryCode) != 2:
-                print "Country code must be two characters"
-            else:
-                self.countryCode = countryCode
-                long_enough = True
-
-        self.orgName = self.getPrompt("Enter Organization Name")
-        self.admin_email = self.getPrompt('Enter email address for support at your organization')
-        self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", '3072')
-        randomPW = self.getPW()
-        self.ldapPass = self.getPrompt("Optional: enter password for oxTrust and LDAP superuser", randomPW)
-
-        promptForOxAuth = self.getPrompt("Install oxAuth OAuth2 Authorization Server?", "Yes")[0].lower()
-        if promptForOxAuth == 'y':
-            self.installOxAuth = True
-        else:
-            self.installOxAuth = False
-
-        promptForOxTrust = self.getPrompt("Install oxTrust Admin UI?", "Yes")[0].lower()
-        if promptForOxTrust == 'y':
-            self.installOxTrust = True
-        else:
-            self.installOxTrust = False
-
-        promptForLDAP = self.getPrompt("Install LDAP Server?", "Yes")[0].lower()
-        if promptForLDAP == 'y':
-            self.installLdap = True
-            option = None
-            while (option != 1) and (option != 2):
-                try:
-                    option = int(self.getPrompt("Install (1) Gluu OpenDJ (2) OpenLDAP Gluu Edition [1|2]", "1"))
-                except ValueError:
-                    option = None
-                if (option != 1) and (option != 2):
-                    print "You did not enter the correct option. Enter either 1 or 2."
-
-            if option == 1:
-                self.ldap_type = 'opendj'
-            elif option == 2:
-                self.ldap_type = 'openldap'
-        else:
-            self.installLdap = False
-
-        promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", "Yes")[0].lower()
-        if promptForHTTPD == 'y':
-            self.installHttpd = True
-        else:
-            self.installHttpd = False
-
-        promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
-        if promptForShibIDP == 'y':
-            self.shibboleth_version = 'v3'
-            self.installSaml = True
-        else:
-            self.installSaml = False
-
-        promptForAsimba = self.getPrompt("Install Asimba SAML Proxy?", "No")[0].lower()
-        if promptForAsimba == 'y':
-            self.installAsimba = True
-        else:
-            self.installAsimba = False
-
-        promptForOxAuthRP = self.getPrompt("Install oxAuth RP?", "No")[0].lower()
-        if promptForOxAuthRP == 'y':
-            self.installOxAuthRP = True
-        else:
-            self.installOxAuthRP = False
-
-        promptForPassport = self.getPrompt("Install Passport?", "No")[0].lower()
-        if promptForPassport == 'y':
-            self.installPassport = True
-        else:
-            self.installPassport = False
-
-            #if self.allowDeprecatedApplications:
-            # Empty deprecated option
-
-        promptForJCE = self.getPrompt("Install JCE 1.8?", "Yes")[0].lower()
-        if promptForJCE == 'y':
-            promptForJCELicense = self.getPrompt("You must accept the Oracle Binary Code License Agreement for the Java SE Platform Products to download this software. Accept License Agreement?", "Yes")[0].lower()
-            if promptForJCELicense == 'y':
-                self.installJce = True
-            else:
-                self.installJce = False
-        else:
-            self.installJce = False
     def copyFile(self, inFile, destFolder):
         try:
             shutil.copy(inFile, destFolder)
@@ -420,34 +281,85 @@ class Setup(object):
             self.logIt("Error copying %s to %s" % (inFile, destFolder), True)
             self.logIt(traceback.format_exc(), True)
 
+    def prepare_base64_extension_scripts(self):
+        try:
+            if not os.path.exists(self.extensionFolder):
+                return None
+
+            for extensionType in os.listdir(self.extensionFolder):
+                extensionTypeFolder = os.path.join(self.extensionFolder, extensionType)
+                if not os.path.isdir(extensionTypeFolder):
+                    continue
+
+                for scriptFile in os.listdir(extensionTypeFolder):
+                    scriptFilePath = os.path.join(extensionTypeFolder, scriptFile)
+                    base64ScriptFile = self.generate_base64_file(scriptFilePath, 1)
+
+                    # Prepare key for dictionary
+                    extensionScriptName = '%s_%s' % (extensionType, os.path.splitext(scriptFile)[0])
+                    extensionScriptName = extensionScriptName.decode('utf-8').lower()
+
+                    self.templateRenderingDict[extensionScriptName] = base64ScriptFile
+                    self.logIt("Loaded script %s with type %s into %s" % (scriptFile, extensionType, extensionScriptName))
+
+        except:
+            self.logIt("Error loading scripts from %s" % self.extensionFolder, True)
+            self.logIt(traceback.format_exc(), True)
+
+
+    def calculate_selected_aplications_memory(self):
+        installedComponents = []
+
+        # Jetty apps
+        if self.installOxTrust:
+            installedComponents.append(self.jetty_app_configuration['identity'])
+
+        self.calculate_aplications_memory(self.application_max_ram, self.jetty_app_configuration, installedComponents)
+
+    def calculate_aplications_memory(self, application_max_ram, jetty_app_configuration, installedComponents):
+        self.logIt("Calculating memory setting for applications")
+
+        allowedApplicationsMemory = {}
+
+        usedRatio = 0.001
+        for installedComponent in installedComponents:
+            usedRatio += installedComponent['memory']['ratio']
+
+        ratioMultiplier = 1.0 + (1.0 - usedRatio)/usedRatio
+
+        for installedComponent in installedComponents:
+            allowedRatio = installedComponent['memory']['ratio'] * ratioMultiplier
+            allowedMemory = int(round(allowedRatio * int(application_max_ram)))
+
+            if allowedMemory > installedComponent['memory']['max_allowed_mb']:
+                allowedMemory = installedComponent['memory']['max_allowed_mb']
+
+            allowedApplicationsMemory[installedComponent['name']] = allowedMemory
+
+        # Iterate through all components into order to prepare all keys
+        for applicationName, applicationConfiguration in jetty_app_configuration.iteritems():
+            if applicationName in allowedApplicationsMemory:
+                applicationMemory = allowedApplicationsMemory.get(applicationName)
+            else:
+                # We uses this dummy value to render template properly of not installed application
+                applicationMemory = 256
+
+            self.templateRenderingDict["%s_max_mem" % applicationName] = applicationMemory
+
+            if 'jvm_heap_ration' in applicationConfiguration['memory']:
+                jvmHeapRation = applicationConfiguration['memory']['jvm_heap_ration']
+
+                minHeapMem = 256
+                maxHeapMem = int(applicationMemory * jvmHeapRation)
+                if maxHeapMem < minHeapMem:
+                    minHeapMem = maxHeapMem
+
+                self.templateRenderingDict["%s_max_heap_mem" % applicationName] = maxHeapMem
+                self.templateRenderingDict["%s_min_heap_mem" % applicationName] = minHeapMem
+
+                self.templateRenderingDict["%s_max_meta_mem" % applicationName] = applicationMemory - self.templateRenderingDict["%s_max_heap_mem" % applicationName]
+
 if __name__ == '__main__':
-    installox = Setup()
-    installox.install_oxtrust()
-'''
-    setupOptions = {
-        'install_dir': '.',
-        'setup_properties': None,
-        'noPrompt': False,
-        'downloadWars': False,
-        'installOxAuth': True,
-        'installOxTrust': True,
-        'installLDAP': True,
-        'installHTTPD': True,
-        'installSaml': False,
-        'installAsimba': False,
-        'installOxAuthRP': False,
-        'installPassport': False,
-        'allowPreReleasedApplications': False,
-        'allowDeprecatedApplications': False,
-        'installJce': False
-    }
-    if len(sys.argv) > 1:
-        setupOptions = getOpts(sys.argv[1:], setupOptions)
-
-    installObject = Setup(setupOptions['install_dir'])
-    installObject.downloadWars = setupOptions['downloadWars']
-
-    installObject.installOxTrust = setupOptions['installOxTrust']
-    installObject.os_type = installObject.detect_os_type()
-    installObject.os_initdaemon = installObject.detect_initd()
-'''
+    install = Setup()
+    install.calculate_selected_aplications_memory()
+    install.install_oxtrust()
