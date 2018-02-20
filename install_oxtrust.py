@@ -91,7 +91,7 @@ class Setup(object):
         self.run([self.cmd_chown, '-R', 'root:gluu', self.oxPhotosFolder])
         self.run([self.cmd_chown, '-R', 'root:gluu', self.oxTrustRemovedFolder])
         self.run([self.cmd_chown, '-R', 'root:gluu', self.oxTrustCacheRefreshFolder])
-
+        self.templateFolder = '%s/templates' % self.install_dir
         self.installOxTrust = True
 
     def install_oxtrust(self):
