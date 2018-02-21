@@ -13,7 +13,7 @@ password = ''
 
 # 'cn=directory manager' for OpenDJ
 
-DN       = 'cn=directory manager,o=gluu'
+DN = 'cn=directory manager,o=gluu'
 
 # Create a random string of characters for the name field
 
