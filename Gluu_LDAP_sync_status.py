@@ -5,12 +5,18 @@ import time
 import random
 from ldap3 import Server, Connection, MODIFY_REPLACE, MODIFY_ADD, MODIFY_DELETE, SUBTREE, ALL, BASE, LEVEL
 
-# Replace with FQDN's of your LDAP servers separated by commas
+# Replace with FQDN's of your LDAP servers separated by commas and appended :1636
 hosts = (
         )
 # Input LDAP DN and Password in the following variables
 password = ''
+
+# 'cn=directory manager' for OpenDJ
+
 DN       = 'cn=directory manager,o=gluu'
+
+# Create a random string of characters for the name field
+
 def getName():
     name = ''
     for i in range(10):
@@ -18,32 +24,44 @@ def getName():
     return name
 
 
+
 def replicationStatus():
     compare = []
     counts = []
     for host in hosts:
         try:
-            ldap_uri = "ldap://{}".format(host)
+            ldap_uri = "ldaps://{}".format(host)
             print 'Connecting to ', host
             server = Server(ldap_uri, use_ssl=True)
             conn = Connection(server, DN, password)
 
             conn.bind()
             conn.search(search_base='o=gluu', search_scope=BASE, search_filter='(objectclass=*)', attributes=['+'])
+                
             # Add the contextCSN to the compare list
+        
             compare.append(conn.response[0]['attributes']['contextCSN'])
+                
             # Search for entries in LDAP
+        
             conn.search(search_base = 'o=gluu',
                      search_filter = '(cn=*)',
                      search_scope = SUBTREE)
             common = conn.entries
+        
             # Count the number of entries in LDAP
+                
             countVar = '{} total users: {}'.format(host, sum(1 for _ in common))
+        
             # Append to the counts list
+                
             counts.append(str(countVar))
+        
         except:
             print host, "seems down"
+        
     # Add server entries to log
+
     log = open("replication_log.log","a")
     i=1
     for count in counts:
@@ -73,7 +91,7 @@ def addUser():
     try:
         host = random.choice(hosts)
 
-        ldap_uri = "ldap://{}".format(host)
+        ldap_uri = "ldaps://{}".format(host)
         server = Server(ldap_uri)
 
         conn = Connection(server, DN, password)
@@ -103,13 +121,13 @@ def addUser():
 
     except:
         print host, "seems to be down"
-
+'''
 def checkDiff():
     compare = []
     for host in hosts:
         ldapEntries = []
         try:
-            ldap_uri = "ldap://{}".format(host)
+            ldap_uri = "ldaps://{}".format(host)
             print 'Connecting to ', host
             server = Server(ldap_uri)
             conn = Connection(server, DN, password)
@@ -137,7 +155,7 @@ def checkDiff():
 
     except:
         print 'Something went wrong...'
-
+'''
 while True:
     n = 10
     i = 0
@@ -147,5 +165,3 @@ while True:
         i = i +1
     print 'Users added. \n'
     replicationStatus()
-    print 'Making sure entries match... \n'
-    checkDiff()
