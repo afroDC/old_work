@@ -1,0 +1,68 @@
+# Search for all 'cn=' entries:
+
+/opt/opendj/bin/ldapsearch -p 1636 -Z -X -D 'cn=directory manager' -w secret -b o=gluu "cn=*"
+
+# Check all entries in OpenLDAP main database:
+
+/opt/symas/bin/mdb_stat -s id2e /opt/gluu/data/main_db/ | grep Entries
+
+# Present all config options in slapd.d set up of OpenLDAP
+
+/opt/symas/bin/slapcat -b "cn=config"
+
+# Simple way to check entry count inside of LDAP:
+
+/opt/opendj/bin/ldapsearch -p 1636 -Z -X -D 'cn=directory manager,o=gluu' -w secret -b o=gluu "cn=*" | wc -l
+
+# Create person manually:
+
+dn: inum=@!09CC.04FF.B567.5F54!0001!FD72.9606!0000!E9E0.1406.6747.C82D,ou=people
+ ,o=@!09CC.04FF.B567.5F54!0001!FD72.9606,o=gluu
+oxCreationTimestamp: 20171012211907.718Z
+uid: dc
+givenName: dc
+displayName: dc
+sn: dc
+mail: dc@dc
+gluuStatus: active
+oxTrustEmail: {"operation":null,"value":"dc@dc","display":"dc@dc","primary":true
+ ,"reference":null,"type":"other"}
+inum: @!09CC.04FF.B567.5F54!0001!FD72.9606!0000!E9E0.1406.6747.C82D
+iname: *person*dc
+userPassword:: e0JDUllQVH0kMmIkMDgkM2JyMHhYQ1JPUk5YZEZYRzhPV25TZXdBNGVwVVp4TjFId
+ HRidlljOGxoclZBQ3BGLjlkMjYA
+cn: dc dc
+objectClass: top
+objectClass: gluuPerson
+objectClass: gluuCustomPerson
+objectClass: eduPerson
+
+# Delete person with inum:
+
+/opt/opendj/bin/ldapdelete -p 1636 -Z -X -D 'cn=directory manager,o=gluu' -w secret 'inum=@!5CA9.1109.76DC.1786!0001!A1ED.09B8!0000!605C.91DB.23FB.0C9E,ou=people ,o=@!5CA9.1109.76DC.1786!0001!A1ED.09B8,o=gluu'
+
+/opt/symas/bin/ldapdelete -p 1636 -Z -X -D 'cn=directory manager,o=gluu' -w secret
+
+# Create ldif's to run with ldapmodify
+
+dn: inum=@!19B5.9DD0.BFC7.332B!0001!7827.EB96!0000!B37E.154C.9372.75C7,ou=people,o=@!19B5.9DD0.BFC7.332B!0001!7827.EB96,o=gluu
+changetype: delete
+
+dn: inum=@!19B5.9DD0.BFC7.332B!0001!7827.EB96!0000!B37E.154C.9372.75C7,ou=people,o=@!19B5.9DD0.BFC7.332B!0001!7827.EB96,o=gluu
+changetype: delete
+objectclass: inetOrgPerson
+cn: Chris Blanton
+sn: Blanton
+uid: dc
+userpassword: test
+homephone: 225-111-2222
+mail: chris@chris.com
+ou: GLUU
+
+# Run ldif with Symas ldapmodify:
+
+/opt/symas/bin/ldapmodify -Z -X -D "cn=directory manager,o=gluu" -w secret -f chris.ldif
+
+# Run ldif with OpenDJ ldapmodify:
+
+/opt/opendj/bin/ldapmodify -p 1636 -Z -X -D 'cn=directory manager' -w secret -b o=gluu -f test.ldif
