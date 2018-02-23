@@ -1,2 +1,3 @@
 # Dev
-Place to store code outside of a desingated repository
+
+A place to store code, configuration files and instructions I use in my day to day development operations.
