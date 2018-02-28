@@ -42,15 +42,12 @@ def genCustNumber():
         i = i + 1
     return s
 
-def getOu(ou='', oInum=''):
-    return """dn: ou=%s,o=%s,o=gluu'
-objectclass: top
-objectclass: organizationalUnit
-ou=%s
-""" % (ou, oInum, ou)
-
 def removeSpaces(s=""):
     return "".join(s.split())
+
+def uniqueInum():
+    gluuPersonInum = "0000!%s.%s.%s.%s" % (getInumQuad(), getInumQuad(), getInumQuad(), getInumQuad())
+    return gluuPersonInum
 
 gluuInum = "@!%s.%s.%s.%s" % (getInumQuad(), getInumQuad(), getInumQuad(), getInumQuad())
 totalUsers = 0
@@ -61,60 +58,47 @@ f.close()
 
 for companyName in companyNames:
     companyName =companyName.strip()
-    orgInumID = '%s.%s' % (getInumQuad(), getInumQuad())
-    oInum = '%s!%s' % (gluuInum, orgInumID)
-    ownerGroupInum = '%s!%s' % (oInum, getInumQuad())
+    oInum = '@!FAB8.F546.45D4.69B5!0001!58FA.DA00' # Change this inum to your organizations inum
+    ownerGroupInum = '%s!%s' % (oInum, uniqueInum())
     oCountry = getCountry()
     mailDomain = '%s.%s' % (removeSpaces(companyName), oCountry)
     oCustNumber = genCustNumber()
-    print 'dn: o=%s,o=gluu' % oInum
-    print 'objectclass: top'
-    print 'objectclass: gluuOrganization'
-    print 'o: %s' % oInum
-    print 'displayName: %s' % companyName
-    print 'gluuCustomerNumber: %s' % oCustNumber
-    print 'status: active'
-    print 'owner: %s' % ownerGroupInum
-    print 'c: %s' % oCountry
-    print
-    print getOu("people", oInum)
-    print
     employeeList= []
     numPeople = randint(1,27)
+    gluuPersonInum = "0000!%s.%s.%s.%s" % (getInumQuad(), getInumQuad(), getInumQuad(), getInumQuad())
+    personInum = '%s!%s' % (oInum, gluuPersonInum)
     while numPeople > 0:
         numPeople = numPeople - 1
         totalUsers = totalUsers + 1
-        personInum = '%s!%s' % (oInum, getInumQuad())
         employeeList.append(personInum)
         personFirstName = getFirstName()
         personLastName = getLastName()
-        print 'dn: inum=%s,ou=people,inum=%s,o=gluu' % (personInum, oInum)
+        mail = "%s.%s@%s.%s" % (personFirstName, personLastName, removeSpaces(companyName), oCountry)
+        print 'dn: inum=%s!%s,ou=people,o=%s,o=gluu' % (oInum, uniqueInum(), oInum)
         print 'objectclass: top'
         print 'objectclass: gluuPerson'
-        print 'c: %s' % oCountry
+        print 'objectclass: gluuCustomPerson'
+        print 'objectclass: eduPerson'
         print 'displayName: %s %s' % (personFirstName, personLastName)
         print 'givenName: %s' % personFirstName
+        print 'iName: %s' % personFirstName
+        print 'oxTrustEmail: {"operation":null,"value":"%s","display":"%s","primary":true,"reference":null,"type":"other"}' % (mail, mail)
         print 'uid: user.%i' % totalUsers
-        print 'inum: %s' % personInum
+        print 'inum: %s!%s' % (oInum, uniqueInum())
         print 'mail: %s.%s@%s.%s' % (personFirstName, personLastName, removeSpaces(companyName), oCountry)
-        if len(employeeList) == 1:
-            print 'memberOf: inum=%s,ou=groups,inum=%s,o=gluu' % (ownerGroupInum, oInum)
-        print 'o: %s' % oInum
-        print 'preferredLanguage: en'
-        print 'gluuCustomerNumber: %s' % oCustNumber
-        print 'gluuAPIKey: %s' % getInumQuad(40)
-        print "secretQuestion: What is your mother's maiden name?"
-        print 'secretAnswer: %s' % getLastName()
-        print 'status: active'
+        print 'gluuStatus: active'
         print 'sn: %s' % personLastName
-        print 'timezone: UTC-06'
-        print 'userpassword: password'
+        print 'cn: %s' % personFirstName
+        print 'userPassword: password'
+        print 'oxCreationTimestamp: 20171128170625.547Z'
         print
-    print getOu('groups', oInum)
-    print "dn: inum=%s,ou=groups,inum=%s,o=gluu" % (ownerGroupInum, oInum)
+#    print getOu('groups', oInum)
+    print "dn: inum=%s,ou=groups,o=%s,o=gluu" % (ownerGroupInum, oInum)
     print "objectclass: top"
     print "objectclass: gluuGroup"
+    print "gluuGroupType: gluuManagerGroup"
     print "inum: %s" % ownerGroupInum
+    print "gluuStatus: active"
     print "displayName: %s Owner Group" % companyName
-    print "member: inum=%s,ou=people,inum=%s,o=gluu" % (employeeList[0], oInum)
+    print "member: inum=%s,ou=people,o=%s,o=gluu" % (employeeList[0], oInum)
     print
