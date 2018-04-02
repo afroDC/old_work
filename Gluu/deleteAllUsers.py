@@ -1,7 +1,7 @@
 from ldap3 import Server, Connection, MODIFY_REPLACE, MODIFY_ADD, MODIFY_DELETE, SUBTREE, ALL, BASE, LEVEL, ALL_ATTRIBUTES
 
 
-# Code to delete all users in an LDAP for developmental purposes.
+# Code to delete all users, except admin, in an LDAP directory for developmental purposes.
 
 # insert hostname or ip here
 host = '<host>:1636' 
