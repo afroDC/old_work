@@ -1,6 +1,6 @@
 Used to generate roughly 1.2 GB's of ldif data for testing a robust Gluu Server.
 
-Simply run the following:
+Change the inum in `genData.py` to match your own and simply run the following:
 
 ```
 python genData.py > example.ldif
