@@ -7,7 +7,11 @@ python genData.py > example.ldif
 ```
 To create an ldif you can use to upload to OpenLDAP.
 
-Alternatively you can write the users directly to LDAP by using the `genUsersToLDAP.py`.
+Alternatively you can write the users directly to LDAP by using the `genUsersToLDAP.py`. It requires ldap3
+
+```
+pip install ldap3
+```
 
 Change the following at the top of the script:
 
