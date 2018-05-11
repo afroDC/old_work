@@ -101,6 +101,7 @@ launchNginx ()
 {
     systemd-run --slice=machine rkt run \
         --net=host \
+        --insecure-options=image \
         --dns 127.0.0.1 \
         --dns 8.8.8.8 \
         --dns-search service.consul \
