@@ -56,24 +56,21 @@ class PersonAuthentication(PersonAuthenticationType):
                 userService = CdiUtil.bean(UserService)
                 user = userService.getUser(user_name)
                 hashed_stored_pass = user.getAttribute("userPassword")
-                print(hashed_stored_pass)
 
                 password_schema = ''
 
                 # Determine password schema
-                # Example: {BCRYPT}$2b$08$71gBXNKJ/iUBXqLjEdEXFesoUYQm5vrpKefi8YhV7ITGfAd9VNFaG
+                # Example for BCrypt: {BCRYPT}$2b$08$71gBXNKJ/iUBXqLjEdEXFesoUYQm5vrpKefi8YhV7ITGfAd9VNFaG
                 for char in hashed_stored_pass:
                     if char == '{':
                         continue
                     if char == '}':
-                        break
+                        break    
                     password_schema = password_schema + char
-                    # Iterate for debugging
-                    print password_schema
+                print("Password Schema is: " + password_schema)
 
                 # OpenDJ's SSHA(512)
                 if 'SSHA' in password_schema:
-
                     # Returns True if authenticated on the backend
                     logged_in = authenticationService.authenticate(user_name, user_password)
 
@@ -85,21 +82,21 @@ class PersonAuthentication(PersonAuthenticationType):
                     salt = salt[0:22]
                     salt = '$2a$08$' + salt
 
-                    # Create hash of challenge clear text password
+                    # Create BCrypt hash of challenge cleartext password using the gathered salt
                     challenge = BCrypt.hashpw(user_password,salt)
 
-                    # Strip unnecessary revision and rounds from both hashed passwords for comparison.
+                    # Strip unnecessary revision($2a$) and rounds(08$) from both hashed passwords for comparison.
                     challenge = challenge.split("$")[3].strip()
                     stored = hashed_stored_pass.split("$")[3].strip()
 
-                    print("Challenge: " + challenge)
-                    print("Stored:    " + stored)
+                    print("Challenge Salt+Hash: " + challenge)
+                    print("Stored Salt+Hash:    " + stored)
 
-                    # Compare the hashses and update hash
+                    # Compare the hashses and update hash if there is a match.
                     if challenge in stored:
 
-                        # Users inputted password hashed matches the hashed password in the backend
-                        # Therefore we update the users password to the backend's password schema
+                        # Users hashed challenge password matches the stored hashed password in the backend
+                        # Therefore we update the users password to the backend's password schema by passing it to OpenDJ
                         print("Updating hash..")
                         user.setAttribute("userPassword",user_password)
                         user = userService.updateUser(user)
@@ -107,13 +104,13 @@ class PersonAuthentication(PersonAuthenticationType):
 
                         # Returns True
                         logged_in = authenticationService.authenticate(user_name)
-                        return logged_in
 
                 # Catch unknown schema types and output to oxauth_script.log
-                # This script can be expanded to include
+                # This script can be expanded to include other password schemas.
                 else:
                     print("Unrecognized algorithm: " + password_schema)
 
+            # If there is no match, logged_in will still be False and authentication will fail.
             if (not logged_in):
                 return False
             logged_in = authenticationService.authenticate(user_name)
