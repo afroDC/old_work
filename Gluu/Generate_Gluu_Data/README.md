@@ -3,7 +3,11 @@ Used to generate roughly 1.2 GB's of ldif data for testing a robust Gluu Server.
 Download each file to your terminal:
 
 ```
-wget https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Generate_Gluu_Data/company_names.txt && wget https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Generate_Gluu_Data/countries.txt && wget https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Generate_Gluu_Data/firstnames.txt && wget https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Generate_Gluu_Data/genUsersToLDAP.py && wget https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Generate_Gluu_Data/lastnames.txt
+wget https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Generate_Gluu_Data/company_names.txt && \
+wget https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Generate_Gluu_Data/countries.txt && \
+wget https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Generate_Gluu_Data/firstnames.txt && \
+wget https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Generate_Gluu_Data/genUsersToLDAP.py && \
+wget https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Generate_Gluu_Data/lastnames.txt
 ```
 
 Change the `hosts` for each node and the password to the directory manager password in `genUsersToLDAP.py` to match your own and simply run the following:
