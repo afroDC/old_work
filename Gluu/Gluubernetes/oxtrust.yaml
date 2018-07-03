@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: oxtrust
+  labels:
+    app: oxtrust
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oxtrust
+  template:
+    metadata:
+      labels:
+        app: oxtrust
+    spec:
+      hostAliases:
+      - ip: 10.24.128.91
+        hostnames:
+        - dev.kube.org
+      containers:
+        - name: oxtrust
+          image: gluufederation/oxtrust:latest
+          env:
+            - name: GLUU_KV_HOST
+              value: consul
+            - name: GLUU_OXAUTH_BACKEND
+              value: "oxauth:8080"
+            - name: GLUU_LDAP_URL
+              value: "opendj:1636"
+          ports:
+          - containerPort: 8080
+            name: jetty-oxtrust
+          - containerPort: 443
+            name: jetty-https
