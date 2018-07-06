@@ -6,7 +6,7 @@ Persistence Volumes/Claims
 services  
 ingress  
 consul  
-config-init (Run as a Job)  
+config-init (Run once as a Job)  
 opendj  
 oxauth  
 oxtrust  
@@ -43,7 +43,7 @@ Now you'll want to launch consul (until we finish our configuration wrapper for 
 kubectl create -f https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Gluubernetes/StatefulSets/consul.yaml
 ```
 
-Once that's up, launch `config-init` to load the configuration for Gluu Server into Consul:
+Once that's up, launch `config-init` to load the configuration for Gluu Server into Consul. This should only be run once ever and you should dump the `config.json` from consul with the `dump` option:
 
 ```
 kubectl create -f https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Gluubernetes/Jobs/config-init.yaml
