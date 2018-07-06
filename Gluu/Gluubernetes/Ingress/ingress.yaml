@@ -30,14 +30,6 @@ spec:
         backend:
           serviceName: oxauth
           servicePort: 8080
-      - path: /.well-known/simple-web-discovery
-        backend:
-          serviceName: oxauth
-          servicePort: 8080
-      - path: /.well-known/webfinger
-        backend:
-          serviceName: oxauth
-          servicePort: 8080
       - path: /oxauth/.well-known/uma2-configuration
         backend:
           serviceName: oxauth
