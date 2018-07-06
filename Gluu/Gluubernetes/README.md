@@ -1,5 +1,9 @@
 # Gluu Kubernetes Templates
 
+Requirements:
+
+Minikube or Kubernetes environment
+
 Order:
 
 1) Persistence Volumes/Claims  
