@@ -3,13 +3,13 @@
 Order:
 
 1) Persistence Volumes/Claims  
-1) services  
-1) ingress  
-1) consul  
-1) config-init (Run once as a Job)  
-1) opendj  
-1) oxauth  
-1)  oxtrust  
+1) Services  
+1) Ingress  
+1) Consul  
+1) Config-init (Run once as a Job)  
+1) OpenDJ  
+1) oxAuth  
+1) oxTrust  
 
 ## Launch Volumes
 
