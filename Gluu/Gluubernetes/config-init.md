@@ -1,1 +1,0 @@
-kubectl run config-init --image=gluufederation/config-init:latest --attach=true --restart=Never -- generate --admin-pw secret --email 'dc@gluu.org' --domain dev.kube.org --org-name 'Gluu, Inc' --country-code US --state TX --city Austin --kv-host consul --ldap-type opendj
