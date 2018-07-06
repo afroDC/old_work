@@ -2,14 +2,14 @@
 
 Order:
 
-Persistence Volumes/Claims
-services
-ingress
-consul
-config-init (Run as a Job)
-opendj
-oxauth
-oxtrust
+Persistence Volumes/Claims  
+services  
+ingress  
+consul  
+config-init (Run as a Job)  
+opendj  
+oxauth  
+oxtrust  
 
 Launch all Persistence Volumes and Volume Claims:
 
