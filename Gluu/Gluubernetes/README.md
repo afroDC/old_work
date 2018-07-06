@@ -45,11 +45,13 @@ kubectl create -f https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Gluub
 
 Once that's up, launch `config-init` to load the configuration for Gluu Server into Consul. This should only be run once ever and you should dump the `config.json` from consul with the `dump` option:
 
-```
-kubectl create -f https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Gluubernetes/Jobs/config-init.yaml
-```
 
-Obviously change the values for `ADMIN_PW`, `EMAIL`, `DOMAIN`, `ORG_NAME`, `COUNTRY_CODE`, `STATE`, and `CITY`. Leave the rest.
+###### Obviously change the values for `ADMIN_PW`, `EMAIL`, `DOMAIN`, `ORG_NAME`, `COUNTRY_CODE`, `STATE`, and `CITY`. Leave the rest.
+
+```
+wget https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Gluubernetes/Jobs/config-init.yaml
+kubectl create -f ./config-init.yaml
+```
 
 Once that's completed you'll need to run OpenDJ:
 
@@ -66,6 +68,8 @@ kubectl create -f https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Gluub
 Note that this is scalable, although not with persistence layers from what I  can assume.
 
 Now launch oxTrust and oxAuth:
+
+###### The `hostAliases` configuration inside of `oxauth.yaml` and `oxtrust.yam`l is optional if you have access to a DNS where the `domain` you entered before in `config-init` is resolvable from your machine. In minikube, you can set it to the `minikube ip` so you can access it through the Ingress Controller.
 
 ```
 kubectl create -f https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Gluubernetes/Deployments/oxauth.yaml\
