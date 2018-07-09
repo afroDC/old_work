@@ -1,0 +1,50 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: oxtrust
+  labels:
+    app: oxtrust
+spec:
+  serviceName: oxtrust
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oxtrust
+  template:
+    metadata:
+      labels:
+        app: oxtrust
+    spec:
+      hostAliases:
+      - ip: 10.24.128.99
+        hostnames:
+        - dev.kube.org
+      volumes:
+        - name: oxtrust-logs
+          persistentVolumeClaim:
+            claimName: oxtrust-logs-volume-claim
+        - name: oxtrust-lib-ext
+          persistentVolumeClaim:
+            claimName: oxtrust-lib-ext-volume-claim
+        - name: oxtrust-custom-static
+          persistentVolumeClaim:
+            claimName: oxtrust-custom-static-volume-claim
+        - name: oxtrust-custom-pages
+          persistentVolumeClaim:
+            claimName: oxtrust-custom-pages-volume-claim
+        - name: oxtrust-shared-shibboleth-idp
+          persistentVolumeClaim:
+            claimName: oxtrust-shared-shibboleth-idp-volume-claim
+      containers:
+        - name: oxtrust
+          image: gluufederation/oxtrust:latest
+          env:
+            - name: GLUU_KV_HOST
+              value: consul
+            - name: GLUU_OXAUTH_BACKEND
+              value: "oxauth:8080"
+            - name: GLUU_LDAP_URL
+              value: "opendj:1636"
+          ports:
+          - containerPort: 8080
+            name: jetty-oxtrust
