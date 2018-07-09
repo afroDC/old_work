@@ -35,6 +35,22 @@ kubectl create -f https://raw.githubusercontent.com/afroDC/Dev/master/Gluu/Gluub
 
 ## Deploy Gluu Server Ingress
 
+- Create certs and upload them to secrets:
+
+```
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ingress.key -out ingress.crt
+openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+
+kubectl create secret tls tls-certificate --key ingress.key --cert ingress.crt
+kubectl create secret generic tls-dhparam --from-file=dhparam.pem
+```
+
+- Enable ingress (Minikube example):
+
+```
+minikube addons enable ingress
+```
+
 ```
 kubectl create -f https://github.com/afroDC/Dev/blob/master/Gluu/Gluubernetes/Ingress/ingress.yaml \
 -f https://github.com/afroDC/Dev/blob/master/Gluu/Gluubernetes/Ingress/ingress-base.yaml \
