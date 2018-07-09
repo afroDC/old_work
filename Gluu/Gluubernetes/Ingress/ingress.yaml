@@ -18,7 +18,7 @@ spec:
         backend:
           serviceName: oxtrust
           servicePort: 8080
-      - path: /.well-known/scim-configuration
+      - path: /identity/restv1/scim-configuration
         backend:
           serviceName: oxtrust
           servicePort: 8080
@@ -30,11 +30,19 @@ spec:
         backend:
           serviceName: oxauth
           servicePort: 8080
-      - path: /oxauth/.well-known/uma2-configuration
+      - path: /.well-known/simple-web-discovery
         backend:
           serviceName: oxauth
           servicePort: 8080
-      - path: /oxauth/.well-known/fido-u2f-configuration
+      - path: /.well-known/webfinger
+        backend:
+          serviceName: oxauth
+          servicePort: 8080
+      - path: /oxauth/restv1/uma2-configuration
+        backend:
+          serviceName: oxauth
+          servicePort: 8080
+      - path: /oxauth/restv1/fido-u2f-configuration
         backend:
           serviceName: oxauth
           servicePort: 8080
