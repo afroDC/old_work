@@ -10,9 +10,36 @@ spec:
       labels:
         app: opendj
     spec:
+      volumes:
+        - name: opendj-config
+          persistentVolumeClaim:
+            claimName: opendj-config-volume-claim
+        - name: opendj-ldif
+          persistentVolumeClaim:
+            claimName: opendj-ldif-volume-claim
+        - name: opendj-logs
+          persistentVolumeClaim:
+            claimName: opendj-logs-volume-claim
+        - name: opendj-db
+          persistentVolumeClaim:
+            claimName: opendj-db-volume-claim
+        - name: opendj-flag
+          persistentVolumeClaim:
+            claimName: opendj-flag-volume-claim
       containers:
         - name: opendj
           image: 'gluufederation/opendj:latest'
+          volumeMounts:
+              - mountPath: /opt/opendj/config
+                name: opendj-config
+              - mountPath: /opt/opendj/ldif
+                name: opendj-ldif
+              - mountPath: /opt/opendj/logs
+                name: opendj-logs
+              - mountPath: /opt/opendj/db
+                name: opendj-db
+              - mountPath: /flag
+                name: opendj-flag 
           env:
             - name: GLUU_KV_HOST
               value: "consul"
