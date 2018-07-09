@@ -10,6 +10,10 @@ spec:
       labels:
         app: consul
     spec:
+      volumes:
+        - name: consul-data
+          persistentVolumeClaim:
+            claimName: consul-data-volume-claim
       containers:
         - name: consul
           image: "consul"
