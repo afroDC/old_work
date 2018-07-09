@@ -12,12 +12,34 @@ spec:
         app: oxauth
     spec:
       hostAliases:
-      - ip: 10.24.128.91
+      - ip: 10.24.128.99
         hostnames:
         - dev.kube.org
+      volumes:
+        - name: oxauth-logs
+          persistentVolumeClaim:
+            claimName: oxauth-logs-volume-claim
+        - name: oxauth-lib-ext
+          persistentVolumeClaim:
+            claimName: oxauth-lib-ext-volume-claim
+        - name: oxauth-custom-static
+          persistentVolumeClaim:
+            claimName: oxauth-custom-static-volume-claim
+        - name: oxauth-custom-pages
+          persistentVolumeClaim:
+            claimName: oxauth-custom-pages-volume-claim
       containers:
         - name: oxauth
           image: gluufederation/oxauth:latest
+          volumeMounts:
+              - mountPath: /opt/gluu/jetty/oxauth/logs
+                name: oxauth-logs
+              - mountPath: /opt/gluu/jetty/oxauth/lib/ext
+                name: oxauth-lib-ext
+              - mountPath: /opt/gluu/jetty/oxauth/custom/static
+                name: oxauth-custom-static
+              - mountPath: oxauth-custom-pages-volume-claim
+                name: oxauth-custom-pages
           env:
             - name: GLUU_KV_HOST
               value: "consul"
@@ -26,5 +48,3 @@ spec:
           ports:
           - containerPort: 8080
             name: jetty-oxauth
-          - containerPort: 443
-            name: jetty-https
