@@ -35,5 +35,6 @@ def configure_server():
     import_key('idp-signing')
     import_key('asimba')
     import_key('opendj')
+    import_key('passport-sp')
 
 configure_server()
