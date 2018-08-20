@@ -1,4 +1,4 @@
-FROM openjdk:jre-alpine
+FROM registry.access.redhat.com/rhel7-minimal
 
 LABEL maintainer="Gluu Inc. <support@gluu.org>"
 
