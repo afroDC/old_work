@@ -15,7 +15,7 @@
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/bin/redis-server
 NAME=redis-cluster
-DESC=redis-cluster
+DESC="Deploy Redis Cluster configs from directories in /etc/redis/cluster/"
 redis_cluster_dir='/etc/redis/cluster/'
 
 set -e
@@ -76,14 +76,14 @@ stop_redis()
 
         if [ "$ubuntu" = true ]
         then
-            if /usr/bin/killall -9 redis-server
+            if /usr/bin/pkill redis-server
             then
                 echo "Redis-server cluster stopped!"
             else
                 echo "Failed stopping redis-server cluster!"
             fi
         else
-            if /usr/bin/kill -9 redis-server
+            if /usr/bin/pkill redis-server
             then
                 echo "Redis-server cluster stopped!"
             else
@@ -102,7 +102,7 @@ stop_stunnel()
         then
             if [ -f /var/run/stunnel.pid ]
             then
-                if /usr/bin/killall -9 stunnel
+                if /usr/bin/pkill stunnel
                 then
                     echo "Stunnel stopped!."
                 else
@@ -112,7 +112,7 @@ stop_stunnel()
                 echo "Stunnel is not running!"
             fi
         else
-            if /usr/bin/kill -9 stunnel
+            if /usr/bin/pkill stunnel
             then
                 echo "Stunnel stopped!."
             else
