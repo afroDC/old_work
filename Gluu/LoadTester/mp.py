@@ -14,7 +14,7 @@ import loadtester
 host = "example.gluu.org:1636"
 
 # Input LDAP DN and Password in the following variables
-password = 'example'
+password = 'secret'
 
 # 'cn=directory manager,o=gluu' for OpenLDAP
 DN = 'cn=directory manager'
@@ -26,7 +26,7 @@ testuser = 'example'
 password = 'secret'
 userlist = []
 
-oInum = loadtester.getoInum()
+oInum = loadtester.getoInum(host,password,DN)
 
 def getUserList():
     print("Gathering all test users into memory.")
@@ -35,8 +35,6 @@ def getUserList():
         server = Server(ldap_uri, use_ssl=True)
         conn = Connection(server, DN, password)
         conn.bind()
-        print('Connected.')
-
         searchBase = 'ou=people,o={},o=gluu'.format(oInum)
         conn.search(search_base = searchBase,
         search_filter = '(uid={}*)'.format(testuser),
@@ -44,6 +42,7 @@ def getUserList():
         attributes=['uid'])
         for entry in conn.entries:
             userlist.append(entry['uid'])
+        print("Done.")
         return userlist
     except Exception as ex:
         print("Cannot connect to host.")
@@ -52,11 +51,11 @@ def getUserList():
 userlist = getUserList()
 
 def mp_loadtest():
-    for x in range(10):
+    for x in range(0,randint(0,30)):
         username = str(userlist[randint(0, len(userlist)-1)]) 
         p = mp.Process(target=loadtester.loadtest, args=(username,))
         p.start()
-    time.sleep(randint(0,5))
+    time.sleep(randint(0,10))
     mp_loadtest()
 
 if __name__ == '__main__':
