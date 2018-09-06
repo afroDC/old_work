@@ -1,0 +1,286 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: opendj-config-volume-claim
+spec:
+  storageClassName: ""
+  volumeName: opendj-config
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100M
+  selector:
+    matchLabels:
+      opendj: config
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: opendj-ldif-volume-claim
+spec:
+  storageClassName: ""
+  volumeName: opendj-ldif
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100M
+  selector:
+    matchLabels:
+      opendj: ldif
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: opendj-logs-volume-claim
+spec:
+  storageClassName: ""
+  volumeName: opendj-logs
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100M
+  selector:
+    matchLabels:
+      opendj: logs
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: opendj-db-volume-claim
+spec:
+  storageClassName: ""
+  volumeName: opendj-db
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100M
+  selector:
+    matchLabels:
+      opendj: db
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: opendj-flag-volume-claim
+spec:
+  storageClassName: ""
+  volumeName: opendj-flag
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100M
+  selector:
+    matchLabels:
+      opendj: flag
+
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: consul-data-volume-claim
+spec:
+  storageClassName: ""
+  volumeName: consul-data
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  selector:
+    matchLabels:
+      consul: data
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: oxauth-logs-volume-claim
+spec:
+  storageClassName: ""
+  volumeName: oxauth-logs
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  selector:
+    matchLabels:
+      oxauth: logs
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: oxauth-lib-ext-volume-claim
+spec:
+  storageClassName: ""
+  volumeName: oxauth-lib-ext
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  selector:
+    matchLabels:
+      oxauth: lib-ext
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: oxauth-custom-static-volume-claim
+spec:
+  storageClassName: ""
+  volumeName: oxauth-custom-static
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  selector:
+    matchLabels:
+      oxauth: custom-static
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: oxauth-custom-pages-volume-claim
+spec:
+  storageClassName: ""
+  volumeName: oxauth-custom-pages
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  selector:
+    matchLabels:
+      oxauth: custom-pages
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: oxtrust-logs-volume-claim
+spec:
+  storageClassName: ""
+  volumeName: oxtrust-logs
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  selector:
+    matchLabels:
+      oxtrust: logs
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: oxtrust-lib-ext-volume-claim
+spec:
+  storageClassName: ""
+  volumeName: oxtrust-lib-ext
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  selector:
+    matchLabels:
+      oxtrust: lib-ext
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: oxtrust-custom-static-volume-claim
+spec:
+  storageClassName: ""
+  volumeName: oxtrust-custom-static
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  selector:
+    matchLabels:
+      oxtrust: custom-static
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: oxtrust-custom-pages-volume-claim
+spec:
+  storageClassName: ""
+  volumeName: oxtrust-custom-pages
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  selector:
+    matchLabels:
+      oxtrust: custom-pages
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: oxtrust-shared-shibboleth-idp-volume-claim
+spec:
+  storageClassName: ""
+  volumeName: oxtrust-shared-shibboleth-idp
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  selector:
+    matchLabels:
+      oxtrust: shared-shibboleth-idp
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: config-volume-claim
+spec:
+  storageClassName: ""
+  volumeName: config
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  selector:
+    matchLabels:
+      config-init: config

@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: gluu-ingress-base
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/app-root: "/identity"
+spec:
+  tls:
+    - hosts:
+      - dev.kube.org
+      secretName: tls-certificate
+  rules:
+  - host: dev.kube.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: oxtrust
+          servicePort: 8080
+        

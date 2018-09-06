@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: gluu-ingress-well-known
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /oxauth/.well-known
+spec:
+  tls:
+    - hosts:
+      - dev.kube.org
+      secretName: tls-certificate
+  rules:
+  - host: dev.kube.org
+    http:
+      paths:
+      - path: /.well-known
+        backend:
+          serviceName: oxauth
+          servicePort: 8080
