@@ -19,11 +19,7 @@ password = 'secret'
 # 'cn=directory manager,o=gluu' for OpenLDAP
 DN = 'cn=directory manager'
 
-login = 'https://example.gluu.org/identity/home.htm'
-logout = 'https://example.gluu.org/identity/logout'
-
 testuser = 'example'
-password = 'secret'
 userlist = []
 
 oInum = loadtester.getoInum(host,password,DN)
@@ -50,13 +46,20 @@ def getUserList():
 
 userlist = getUserList()
 
-def mp_loadtest():
-    for x in range(0,randint(0,30)):
-        username = str(userlist[randint(0, len(userlist)-1)]) 
-        p = mp.Process(target=loadtester.loadtest, args=(username,))
-        p.start()
-    time.sleep(randint(0,10))
-    mp_loadtest()
+def worker(tasks):
+    username = str(userlist[randint(0, len(userlist)-1)]) 
+    loadtester.loadtest(username)
+
+def main():
+
+    pool = mp.Pool()
+    total_tasks = 50000
+    tasks = range(total_tasks)
+
+    results = pool.map_async(worker, tasks).get(5000)
+    pool.close()
+    pool.join()
+
 
 if __name__ == '__main__':
-    mp_loadtest()
+    main()
