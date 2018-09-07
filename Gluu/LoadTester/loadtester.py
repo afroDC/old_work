@@ -34,39 +34,62 @@ def getoInum(host,password,DN):
 
 def loadtest(username):
     # Build session states
+    t0 = time.time()
     r = requests.get(login, verify=False)
     if r.status_code == 200:
         #print('Initial request successful.')
-
+        t0 = time.time()
         # Log user in
         r = requests.get(login, auth=(username,userpassword), verify=False)
         if r.status_code == 200:
             #print('Logged in as {}'.format(username))
+            t1 = time.time() - t0
             loadlog = open("activity.log", "a")
-            loadlog.write("{} [INFO] {} {} logged in.\n".format(time.asctime( time.localtime(time.time()) ), str(r.status_code), username))
+            timelog = open("times.log", "a")
+            loadlog.write("{} [SUCCESS] {} {} logged in.\n".format(time.asctime( time.localtime(time.time()) ), str(r.status_code), username))
+            timelog.write("{} [SUCCESS] {} Login took {} seconds.\n".format(time.asctime( time.localtime(time.time()) ), username, str(t1)))
             loadlog.close()
+            timelog.close()
+
+            t0 = time.time()
             # Log user out
             r = requests.get(logout, verify=False)
             if r.status_code == 200:
                 #print('Logged out as {}'.format(username))
+                t1 = time.time() - t0
                 loadlog = open("activity.log", "a")
-                loadlog.write("{} [INFO] {} {} logged out.\n".format(time.asctime( time.localtime(time.time()) ), str(r.status_code), username))
+                timelog = open("times.log", "a")
+                loadlog.write("{} [SUCCESS] {} {} logged out.\n".format(time.asctime( time.localtime(time.time()) ), str(r.status_code), username))
+                timelog.write("{} [SUCCESS] {} Logout took {} seconds.\n".format(time.asctime( time.localtime(time.time()) ), username, str(t1)))
                 loadlog.close()
+                timelog.close()
             else:
                 print("{} [ERROR] {} Logout failed. Please check error.log.".format(time.asctime( time.localtime(time.time()) ), str(r.status_code)))
+                t1 = time.time() - t0
                 loadErrorlog = open("error.log", "a")
+                timelog = open("times.log", "a")
                 loadErrorlog.write("{} [ERROR] {} Logout failed for user {}\n".format(time.asctime( time.localtime(time.time()) ), str(r.status_code), username))
                 loadErrorlog.write("{} [FAILED] \n{}\n{}\n".format(time.asctime( time.localtime(time.time()) ), str(r.reason), str(r.text)))
+                timelog.write("{} [FAILED] {} Logout failed and took {} seconds to return a response.\n".format(time.asctime( time.localtime(time.time()) ), username, str(t1)))
                 loadErrorlog.close()
+                timelog.close()
         else:
             print("{} [ERROR] {} Login failed. Please check error.log.".format(time.asctime( time.localtime(time.time()) ), str(r.status_code)))
+            t1 = time.time() - t0
             loadErrorlog = open("activity.log", "a")
+            timelog = open("times.log", "a")
             loadErrorlog.write("{} [ERROR] {} Login failed for user {}\n".format(time.asctime( time.localtime(time.time()) ), str(r.status_code), username))
             loadErrorlog.write("{} [FAILED] \n{}\n{}\n".format(time.asctime( time.localtime(time.time()) ), str(r.reason), str(r.text)))
+            timelog.write("{} [FAILED] {} Login failed and took {} seconds to return a response.\n".format(time.asctime( time.localtime(time.time()) ), username, str(t1)))
             loadErrorlog.close()
+            timelog.close()
     else:
         print("{} [ERROR] {} Session connection failed. Please check error.log.".format(time.asctime( time.localtime(time.time()) ), str(r.status_code)))
+        t1 = time.time() - t0
         loadErrorlog = open("error.log", "a")
+        timelog = open("times.log", "a")
         loadErrorlog.write("{} [ERROR] {}\n".format(time.asctime( time.localtime(time.time()) ), str(r.status_code)))
         loadErrorlog.write("{} [FAILED] \n{}\n{}\n".format(time.asctime( time.localtime(time.time()) ), str(r.reason), str(r.text)))
+        timelog.write("{} [FAILED] {} Session connection failed and took {} seconds to return a response.\n".format(time.asctime( time.localtime(time.time()) ), username,  str(t1)))
         loadErrorlog.close()
+        timelog.close()
