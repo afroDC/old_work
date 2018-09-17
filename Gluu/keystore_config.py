@@ -29,6 +29,7 @@ def configure_server():
     delete_key('idp-signing')
     delete_key('asimba')
     delete_key('opendj')
+    delete_key('passport-sp')
     import_key('httpd')
     import_key('shibIDP')
     import_key('idp-encryption')
