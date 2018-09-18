@@ -2,13 +2,12 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <script type="text/javascript" src="../main.js"></script>
   </head>
-  <body>
-    <div id="result"></div>
+  <body onload="parseUrl();">
     <h1>Success!</h1>
     <p>Implicit Flow Worked.</p>
-    <p></p>
-    <script type="text/javascript" src="../main.js"></script>
-    <button onclick="postAuthRedirect();">Parse Response and Continue Flow.</button>
+    <p id="result"></p>
+    <button onclick="postAuthRedirect();">Continue Flow.</button>
   </body>
 </html>
