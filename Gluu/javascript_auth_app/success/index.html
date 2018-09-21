@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <script type="text/javascript" src="../main.js"></script>
   </head>
-  <body onload="parseUrl();">
-    <h1>Success!</h1>
+  <body onload="parseUrl(); postAuthRedirect();">
+    <h1 id="passFail">Success!</h1>
     <p>Implicit Flow Worked.</p>
     <p id="result"></p>
     <button onclick="postAuthRedirect();">Continue Flow.</button>

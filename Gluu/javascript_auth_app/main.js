@@ -1,6 +1,6 @@
 const AsUrl = 'https://c5.gluu.org';
 const clientID = '@!82F6.00B8.C20E.272F!0001!DC79.0594!0008!1E13.CB20.2F74.F9BE';
-const responseType = 'id_token client_id'
+const responseType = 'id_token token'
 const scopes = 'openid profile email'
 
 // Utilities //
@@ -37,7 +37,7 @@ function parseUrl () {
         temp = responses[i].split('=');
         params[temp[0]] = temp[1];
     }
-    // Store certain params in a cookie and store the rest of the response in a database
+    // Store certain params, like ID Token, scope, etc in a "database" and store session_state in a cookie.
     window.localStorage.setItem("authResp", JSON.stringify(params));
     setCookie("session_state",params.session_state,1);
 }
@@ -65,6 +65,17 @@ function getCookieValue(cookieName) {
     return null;
 }
 
+function parseJsonResponseForHtml (jsonobject) {
+    var output = '';
+    var obj = jsonobject;
+    for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            output = output + key + ' : ' + obj[key] + '<br />';
+        }
+    }
+    return output;
+}
+
 // Session Management //
 
 function startChecking() {
@@ -87,7 +98,6 @@ function receiveOPMessage (event) {
         alert("Origin did not come from the OP; this message must be rejected")
         return;
     }
-    alert(event.data);
     if (event.data === "unchanged") {
             // User is still logged in to the OP
             // Do nothing
@@ -97,6 +107,17 @@ function receiveOPMessage (event) {
             // Take some action to attempt refreshing session or forcing user/client to re-auth
             document.getElementById("login_status").innerHTML = "Logged Out."
     }
+}
+
+function logout () {
+    // End current local application session.
+    var response = JSON.parse(window.localStorage.getItem("authResp"));
+    idToken64 = response.id_token;
+    const postLogoutUri = 'http://localhost:8080/finish_logout'
+    const getUrl = AsUrl + '/oxauth/restv1/end_session' + '?post_logout_redirect_uri=' + postLogoutUri;
+    document.cookie = "session_state=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    window.location.replace(getUrl);
+    window.localStorage.removeItem("authResp");
 }
 
 // Authentication //
@@ -150,14 +171,25 @@ function postAuthRedirect () {
     if (validate(idToken['iss'], idToken['nonce'], idToken['aud'])) {
         window.location.replace("http://localhost:8080/");
     }
+    else {
+        document.getElementById("passFail").innerHTML = "Failed to validate response!";
+    }
 }
 
-function logout () {
-    // End current session.
-    var response = JSON.parse(window.localStorage.getItem("authResp"));
-    idToken64 = response.id_token;
-    const postLogoutUri = 'http://localhost:8080/finish_logout'
-    const getUrl = AsUrl + '/oxauth/restv1/end_session' + '?post_logout_redirect_uri=' + postLogoutUri;
-    document.cookie = "session_state=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    window.location.replace(getUrl);
+function gatherUserClaims () {
+    authData = JSON.parse(window.localStorage.getItem('authResp'));
+    accessToken = authData.access_token;
+    url = AsUrl + '/oxauth/restv1/userinfo';
+    var http = new XMLHttpRequest();
+    http.onreadystatechange = function() {     
+        if (this.readyState == 4 && this.status == 200) {
+            document.getElementById("user_claims").innerHTML = parseJsonResponseForHtml(JSON.parse(this.responseText));
+        }
+        else {
+            document.getElementById("user_claims").innerHTML = parseJsonResponseForHtml(JSON.parse(this.responseText));
+        }
+    };
+    http.open("GET", url);
+    http.setRequestHeader('Authorization','Bearer ' + accessToken);
+    http.send();
 }
