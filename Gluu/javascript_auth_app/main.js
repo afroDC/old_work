@@ -130,7 +130,7 @@ function implicitAuthRequest(){
     // Auth requested formatted as such according to https://openid.net/specs/openid-connect-core-1_0.html#ImplicitAuthRequest
     const getUrl = AsAuthUrl + '?response_type=' + responseType + '&client_id=' + clientID + '&redirect_uri=' + redirectUri + '&scope=' + scopes + '&state=' + state + '&nonce=' + nonce;
     // Store nonce and state
-    window.localStorage.setItem("nonce", nonce);
+    setCookie("nonce", nonce, 1);
     setCookie("state", state, 1);
     // Redirect for Implicit Flow
     window.location.replace(getUrl);
@@ -140,8 +140,7 @@ function validate (issuer, nonce, audience) {
 
     // Should fully validate based off of OpenID Connect Core 3.2.2.8. Authentication Response Validation
     // 3.2.2.9. Access Token Validation and 3.2.2.11. ID Token Validation
-
-    appNonce = window.localStorage.getItem('nonce');
+    var appNonce = getCookieValue('nonce');
 
     if (issuer != AsUrl) {
         alert("Issuer does not match.");
@@ -164,10 +163,10 @@ function validate (issuer, nonce, audience) {
 function postAuthRedirect () {
     // Gather our authentication response to verify
     var response = JSON.parse(window.localStorage.getItem("authResp"));
-    // Base64 Decode the id_token
+    // Base64 Decode the id_token from the authentication response
     idToken64 = response.id_token;
     idToken = parseJwt(idToken64);
-    // Verify nonce, audience, response type and issuer
+    // Verify nonce, audience, response type and issuer then forward the user to a pseudo passed authentication page.
     if (validate(idToken['iss'], idToken['nonce'], idToken['aud'])) {
         window.location.replace("http://localhost:8080/");
     }
@@ -177,8 +176,14 @@ function postAuthRedirect () {
 }
 
 function gatherUserClaims () {
-    authData = JSON.parse(window.localStorage.getItem('authResp'));
-    accessToken = authData.access_token;
+    if (authData = JSON.parse(window.localStorage.getItem('authResp'))) {
+        accessToken = authData.access_token;
+    }
+    else {
+        // Fake access token for testing
+        accessToken = 'c769d7ff-c476-42ab-b531-fe2f60b2f5cc';
+    }
+    
     url = AsUrl + '/oxauth/restv1/userinfo';
     var http = new XMLHttpRequest();
     http.onreadystatechange = function() {     
