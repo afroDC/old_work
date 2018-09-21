@@ -120,7 +120,7 @@ function logout () {
     window.localStorage.removeItem("authResp");
 }
 
-// Authentication //
+// Implicit Flow Authentication //
 
 function implicitAuthRequest(){
     const AsAuthUrl=AsUrl + '/oxauth/restv1/authorize';

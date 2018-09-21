@@ -3,10 +3,12 @@
   <head>
     <meta charset="utf-8">
     <iframe id="iframeOP" src="https://c5.gluu.org/oxauth/opiframe.htm" frameborder="0" width="0" height="0""></iframe>
-    <script type="text/javascript" src="main.js"></script>
+    <script type="text/javascript" src="main_auth_code_flow.js"></script>
+    <script type="text/javascript" src="main_implicit_flow.js"></script>
   </head>
   <body onload="startChecking()">
-    <button onclick="implicitAuthRequest()">Login with Gluu</button>
+    <button onclick="implicitAuthRequest()">Implicit Flow with Gluu</button>
+    <button onclick="authCodeRequest()">Authroization Code Flow with Gluu</button>
     <button onclick="logout()">Logout</button>
     <p id="login_status">Unauthenticated.</p>
     <button onclick="gatherUserClaims()">Gather User Claims</button>
