@@ -1,6 +1,8 @@
 # Search for all 'cn=' entries:
 
-/opt/opendj/bin/ldapsearch -p 1636 -Z -X -D 'cn=directory manager' -w secret -b o=gluu "cn=*"
+/opt/opendj/bin/ldapsearch -p 1636 -Z -X -D 'cn=directory manager' -w secret -b o=gluu "objectclass=*"
+
+/opt/opendj/bin/ldapdelete -p 1636 -Z -X -D 'cn=directory manager' -w secret 'inum=@!77DF.4072.981D.7349!0001!0244.0538!0000!BA97.20F7.7AD0.198D,ou=people,o=@!77DF.4072.981D.7349!0001!0244.0538,o=gluu'
 
 # Check all entries in OpenLDAP main database:
 
@@ -12,7 +14,17 @@
 
 # Simple way to check entry count inside of LDAP:
 
-/opt/opendj/bin/ldapsearch -p 1636 -Z -X -D 'cn=directory manager,o=gluu' -w secret -b o=gluu "cn=*" | wc -l
+/opt/opendj/bin/ldapsearch -p 1636 -Z -X -D 'cn=directory manager' -w secret -b o=gluu "objectclass=*" | wc -l
+
+# Search all schema:
+
+OpenLDAP:
+
+/opt/opendj/bin/ldapsearch -p 1636 -Z -X -D 'cn=directory manager,o=gluu' -w secret -b cn=subschema -s base "objectclass=*" +
+
+OpenDJ:
+
+/opt/opendj/bin/ldapsearch -p 1636 -Z -X -D 'cn=directory manager' -w secret -b cn=schema -s base "objectclass=*" +
 
 # Create person manually:
 
@@ -39,9 +51,9 @@ objectClass: eduPerson
 
 # Delete person with inum:
 
-/opt/opendj/bin/ldapdelete -p 1636 -Z -X -D 'cn=directory manager,o=gluu' -w secret 'inum=@!5CA9.1109.76DC.1786!0001!A1ED.09B8!0000!605C.91DB.23FB.0C9E,ou=people ,o=@!5CA9.1109.76DC.1786!0001!A1ED.09B8,o=gluu'
+/opt/opendj/bin/ldapdelete -p 1636 -Z -X -D 'cn=directory manager' -w secret 'inum=@!5CA9.1109.76DC.1786!0001!A1ED.09B8!0000!605C.91DB.23FB.0C9E,ou=people ,o=@!5CA9.1109.76DC.1786!0001!A1ED.09B8,o=gluu'
 
-/opt/symas/bin/ldapdelete -p 1636 -Z -X -D 'cn=directory manager,o=gluu' -w secret
+/opt/symas/bin/ldapdelete -p 1636 -Z -X -D 'cn=directory manager' -w secret
 
 # Create ldif's to run with ldapmodify
 
@@ -61,8 +73,20 @@ ou: GLUU
 
 # Run ldif with Symas ldapmodify:
 
-/opt/symas/bin/ldapmodify -Z -X -D "cn=directory manager,o=gluu" -w secret -f chris.ldif
+/opt/symas/bin/ldapmodify -Z -X -D "cn=directory manager, o=gluu" -w secret -f chris.ldif
 
 # Run ldif with OpenDJ ldapmodify:
 
 /opt/opendj/bin/ldapmodify -p 1636 -Z -X -D 'cn=directory manager' -w secret -b o=gluu -f test.ldif
+
+# Check replication status
+
+/opt/opendj/bin/dsreplication status -n -X -h c5.gluu.org -p 1444 -I admin -w secret
+
+/opt/opendj/bin/dsreplication status -n -X -p 1444 -I admin -w secret
+
+/opt/opendj/bin/dsconfig list-replication-domains --provider-name "Multimaster Synchronization" --hostname c5.gluu.org --port 4444 --bindDN "cn=Directory Manager" --bindPassword Gluu1234! --no-prompt --trustAll
+
+# Change Listen Address For OpenDJ
+
+/opt/opendj/bin/dsconfig -h localhost -p 4444 -D "cn=directory manager" -w secret -n   set-connection-handler-prop   --handler-name="LDAPS Connection Handler" --set listen-address:0.0.0.0 -X
