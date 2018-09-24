@@ -1,6 +1,6 @@
 const AsUrl = 'https://c5.gluu.org';
 const clientID = '@!82F6.00B8.C20E.272F!0001!DC79.0594!0008!1E13.CB20.2F74.F9BE';
-const responseType = 'id_token token'
+// const responseType = 'id_token token code'
 const scopes = 'openid profile email'
 
 // Utilities //
@@ -30,7 +30,11 @@ function parseUrl () {
     url = url.substring(1);
     var params = {}, responses, temp, i, l;
     // Split into key/value pairs
-    url = url.split('#').pop();
+    if (url.includes("#")) {
+        url = url.split('#').pop();
+    } else {
+        url = url.split('?').pop();
+    }
     responses = url.split("&");
     // Convert the array of strings into an object
     for ( i = 0, l = responses.length; i < l; i++ ) {
@@ -78,41 +82,12 @@ function parseJsonResponseForHtml (jsonobject) {
 
 // Session Management //
 
-function startChecking() {
-    checkSessionStatus();
-    // Check status every 60 seconds
-    setInterval("checkSessionStatus()", 1000*60);
-}
-
-function checkSessionStatus () {
-    // Display session status on "/"" and also intermittently check that the users Gluu Server session is still valid
-    var sessionState = getCookieValue("session_state");
-    var mes = clientID + " " + sessionState;
-    var iframe = document.getElementById("iframeOP");
-    iframe.contentWindow.postMessage(mes, "https://c5.gluu.org");
-    window.addEventListener("message", receiveOPMessage, false);
-}
-
-function receiveOPMessage (event) {
-    if (event.origin !== AsUrl) {
-        alert("Origin did not come from the OP; this message must be rejected")
-        return;
-    }
-    if (event.data === "unchanged") {
-            // User is still logged in to the OP
-            // Do nothing
-            document.getElementById("login_status").innerHTML = "Logged In."
-    } else {
-            // User has logged out of the OP
-            // Take some action to attempt refreshing session or forcing user/client to re-auth
-            document.getElementById("login_status").innerHTML = "Logged Out."
-    }
-}
-
 function logout () {
     // End current local application session.
-    var response = JSON.parse(window.localStorage.getItem("authResp"));
-    idToken64 = response.id_token;
+    if (JSON.parse(window.localStorage.getItem("authResp"))){
+        var response = JSON.parse(window.localStorage.getItem("authResp"))
+        idToken64 = response.id_token;
+    }
     const postLogoutUri = 'http://localhost:8080/finish_logout'
     const getUrl = AsUrl + '/oxauth/restv1/end_session' + '?post_logout_redirect_uri=' + postLogoutUri;
     document.cookie = "session_state=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -122,9 +97,20 @@ function logout () {
 
 // Implicit Flow Authentication //
 
-function implicitAuthRequest(){
+function authRequest(type){
+    if ( type == 'implicit'){
+        responseType = 'id_token token';
+    } 
+    
+    else if ( type == 'code'){
+        responseType = 'code';
+    }
+
+    else if ( type == 'hybrid'){
+        responseType = 'id_token token code';
+    }
     const AsAuthUrl=AsUrl + '/oxauth/restv1/authorize';
-    const redirectUri='http://localhost:8080/success';
+    const redirectUri='http://localhost:8080/success/';
     let state = randomString();
     let nonce = randomString();
     // Auth requested formatted as such according to https://openid.net/specs/openid-connect-core-1_0.html#ImplicitAuthRequest
@@ -160,19 +146,56 @@ function validate (issuer, nonce, audience) {
     return true;
 }
 
+function gatherToken (code) {
+    url = AsUrl + '/oxauth/restv1/token';
+    redirectUri = 'http://localhost:8080/'
+    var http = new XMLHttpRequest();
+    data = 'grant_type=authorization_code&code=' + code + '&client_id=' + clientID + '&client_secret=secret' + "&redirect_uri=" + redirectUri;
+    http.onreadystatechange = function() {     
+        if (this.readyState == 4 && this.status == 200) {
+            // Store access token and redirect to demo page.
+        }
+    };
+    http.open("POST", url);
+    http.send(data);
+}
+
 function postAuthRedirect () {
     // Gather our authentication response to verify
     var response = JSON.parse(window.localStorage.getItem("authResp"));
-    // Base64 Decode the id_token from the authentication response
-    idToken64 = response.id_token;
-    idToken = parseJwt(idToken64);
-    // Verify nonce, audience, response type and issuer then forward the user to a pseudo passed authentication page.
-    if (validate(idToken['iss'], idToken['nonce'], idToken['aud'])) {
-        window.location.replace("http://localhost:8080/");
+    
+    url = document.location.href;
+
+    if (url.includes('access_token')){
+        if (url.includes('code')) {
+            alert('Hybrid Flow');
+            responseType = 'hybrid';
+        }
+        alert('Implicit Flow');
+        responseType = 'implicit';
     }
-    else {
-        document.getElementById("passFail").innerHTML = "Failed to validate response!";
+    else if (url.includes('code')) {
+        alert('Authorization Code Flow');
+        responseType = 'code';
     }
+    if (responseType == 'implicit') {
+        // Base64 Decode the id_token from the authentication response
+        idToken64 = response.id_token;
+        idToken = parseJwt(idToken64);
+        // Verify nonce, audience, response type and issuer then forward the user to a pseudo passed authentication page.
+        if (validate(idToken['iss'], idToken['nonce'], idToken['aud'])) {
+            window.location.replace("http://localhost:8080/");
+        }
+        else {
+            document.getElementById("passFail").innerHTML = "Failed to validate response!";
+        }
+    }
+    else if (responseType = 'code') {
+        var response = JSON.parse(window.localStorage.getItem("authResp"));
+        authCode = response.code;
+        gatherToken(authCode);    
+    }
+    
 }
 
 function gatherUserClaims () {

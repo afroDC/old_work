@@ -3,15 +3,79 @@
   <head>
     <meta charset="utf-8">
     <iframe id="iframeOP" src="https://c5.gluu.org/oxauth/opiframe.htm" frameborder="0" width="0" height="0""></iframe>
-    <script type="text/javascript" src="main_auth_code_flow.js"></script>
-    <script type="text/javascript" src="main_implicit_flow.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+    <script type="text/javascript" src="/main_auth.js"></script>
   </head>
-  <body onload="startChecking()">
-    <button onclick="implicitAuthRequest()">Implicit Flow with Gluu</button>
-    <button onclick="authCodeRequest()">Authroization Code Flow with Gluu</button>
+  <body onload="updateMes(); setTimer()">
+    <button onclick="authRequest('implicit')">Implicit Flow Authentication with Gluu</button>
+    <button onclick="authRequest('code')">Authorization Code Flow with Gluu</button>
     <button onclick="logout()">Logout</button>
     <p id="login_status">Unauthenticated.</p>
     <button onclick="gatherUserClaims()">Gather User Claims</button>
     <p id="user_claims">User Claims.</p>
   </body>
+  <script>
+    // Check User Session Status
+    //<![CDATA[
+    var rpOrigin = window.location.origin;
+    var opOrigin = 'https://c5.gluu.org';
+    var clientId = '@!82F6.00B8.C20E.272F!0001!DC79.0594!0008!1E13.CB20.2F74.F9BE';
+    
+    var op_browser_state = getCookieValue('session_state');
+    var mes = null;
+    var timerId = null;
+
+    function getCookieValue(cookieName) {
+        var name = cookieName + "=";
+        var cookies = document.cookie.split(';');
+        if (!cookies) {
+                return null;
+        }
+        for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.indexOf(name) == 0) {
+                            return cookie.substring(name.length, cookie.length);
+                }
+        }
+        return null;
+    }
+
+    function updateMes() {
+        var salt = CryptoJS.lib.WordArray.random(128 / 8);
+        mes = clientId + ' ' + CryptoJS.SHA256(clientId + ' ' + rpOrigin + ' ' + op_browser_state + ' ' + salt) + "." + salt;
+    }
+
+    function checkSession() {
+        var win = window.parent.document.getElementById("iframeOP").contentWindow;
+        win.postMessage(mes, opOrigin);
+    }
+
+    function setTimer() {
+        clearTimer();
+        checkSession();
+        timerId = setInterval("checkSession()", 3 * 1000);
+    }
+
+    function clearTimer() {
+        if (timerId) {
+            window.clearInterval(timerId);
+            timerId = null;
+        }
+    }
+
+    window.addEventListener("message", receiveMessage, false);
+
+    function receiveMessage(e) {
+        if (e.origin !== opOrigin) {
+            return;
+        }
+        console.log("Session State: " + e.data);
+        if (e.data == "unchanged") {
+            document.getElementById("login_status").innerHTML = "User is currently logged in with a valid session.";
+        } else {
+            document.getElementById("login_status").innerHTML = "User logged out and no longer has a valid session.";
+        }
+    }
+    //]]>
+  </script>
 </html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>
+		oxAuth - RP iFrame
+	</title>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+	<script>
+        //<![CDATA[
+        var rpOrigin = window.location.origin;
+        var opOrigin = 'https://c5.gluu.org';
+        var clientId = '@!82F6.00B8.C20E.272F!0001!DC79.0594!0008!1E13.CB20.2F74.F9BE';
+        
+        var op_browser_state = getCookieValue('session_state');
+        var mes = null;
+        var timerId = null;
+
+        function getCookieValue(cookieName) {
+            var name = cookieName + "=";
+            var cookies = document.cookie.split(';');
+            if (!cookies) {
+                    return null;
+            }
+            for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.indexOf(name) == 0) {
+                                return cookie.substring(name.length, cookie.length);
+                    }
+            }
+            return null;
+        }
+
+        function updateMes() {
+            var salt = CryptoJS.lib.WordArray.random(128 / 8);
+            mes = clientId + ' ' + CryptoJS.SHA256(clientId + ' ' + rpOrigin + ' ' + op_browser_state + ' ' + salt) + "." + salt;
+        }
+
+        function checkSession() {
+            var win = window.parent.document.getElementById("iframeOP").contentWindow;
+            win.postMessage(mes, opOrigin);
+        }
+
+        function setTimer() {
+            clearTimer();
+            checkSession();
+            timerId = setInterval("checkSession()", 3 * 1000);
+        }
+
+        function clearTimer() {
+            if (timerId) {
+                window.clearInterval(timerId);
+                timerId = null;
+            }
+        }
+
+        window.addEventListener("message", receiveMessage, false);
+
+        function receiveMessage(e) {
+            if (e.origin !== opOrigin) {
+                return;
+            }
+            console.log("Session State: " + e.data);
+            if (e.data == "unchanged") {
+                alert("Session State: " + e.data);
+            } else {
+                clearTimer();
+                alert("Session State has changed.")
+            }
+        }
+        //]]>
+	</script>
+</head>
+
+<body onload="updateMes(); setTimer()">
+</body>
+
+</html>
