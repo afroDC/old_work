@@ -11,15 +11,19 @@ import multiprocess_addToLDAP
 
 oInum = multiprocess_addToLDAP.getoInum()
 
-def mp_addToLDAP():
-    for users in range(25000):
-        argus = [users,oInum]
-        p = mp.Process(target=multiprocess_addToLDAP.addToLDAP, args=(argus,))
-        p.start()
+def worker(tasks):
+    argus = [tasks,oInum]
+    multiprocess_addToLDAP.addToLDAP(argus)
+
+def main():
+
+    pool = mp.Pool()
+    total_tasks = 50000
+    tasks = range(total_tasks)
+
+    results = pool.map_async(worker, tasks).get(5000)
+    pool.close()
+    pool.join()
 
 if __name__ == '__main__':
-    start = time.time()
-    mp_addToLDAP()
-    end = time.time()
-    diff = end - start
-    print("Adding 25,000 users took {} seconds".format(diff))
+    main()
