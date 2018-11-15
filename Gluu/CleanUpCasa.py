@@ -2,7 +2,7 @@ from ldap3 import Server, Connection, MODIFY_REPLACE, MODIFY_ADD, MODIFY_DELETE,
 
 # Remove all traces of Casa from LDAP
 
-host = 'c4.gluu.org:1636' 
+host = 'server:1636' 
 DN = 'cn=directory manager'
 password = 'secret'
 
